@@ -37,6 +37,13 @@ prisma/dev.db-journal
 public/uploads/*
 !public/uploads/.gitkeep
 
+# source images / screenshots
+*.png
+*.jpg
+*.jpeg
+Humaaans*.svg
+Screenshot*.png
+
 # vercel
 .vercel
 
