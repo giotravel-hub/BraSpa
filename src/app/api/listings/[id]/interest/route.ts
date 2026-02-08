@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Resend } from "resend";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -10,6 +11,15 @@ export async function POST(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+  const ip = getClientIp(req);
+  const { success } = rateLimit(`interest:${ip}`, { limit: 5, windowMs: 60_000 });
+  if (!success) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "You must be logged in to express interest" }, { status: 401 });
