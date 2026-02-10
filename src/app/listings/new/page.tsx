@@ -39,6 +39,12 @@ export default function NewListingPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (imageUrls.length === 0) {
+      setError("Please add at least one photo — listings with pictures get much more interest!");
+      return;
+    }
+
     setLoading(true);
 
     try {
