@@ -23,7 +23,8 @@ export const authOptions: AuthOptions = {
         const isValid = await compare(credentials.password, user.passwordHash);
         if (!isValid) return null;
 
-        if (!user.emailVerified) return null;
+        // TODO: Re-enable once a domain is verified in Resend
+        // if (!user.emailVerified) return null;
 
         return { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin };
       },

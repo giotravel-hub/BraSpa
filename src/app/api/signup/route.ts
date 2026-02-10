@@ -3,8 +3,6 @@ import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { isPasswordValid } from "@/lib/password-validation";
-import { generateToken } from "@/lib/tokens";
-import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   const ip = getClientIp(req);
@@ -72,24 +70,17 @@ export async function POST(req: Request) {
     }
 
     const passwordHash = await hash(password, 12);
-    const verifyToken = generateToken();
-
     await prisma.user.create({
       data: {
         name: trimmedName,
         email: trimmedEmail,
         passwordHash,
         zipCode: trimmedZip,
-        verifyToken,
+        emailVerified: true,
       },
     });
 
-    await sendVerificationEmail(trimmedEmail, verifyToken);
-
-    return NextResponse.json({
-      message: "Account created. Please check your email to verify.",
-      requiresVerification: true,
-    });
+    return NextResponse.json({ message: "Account created successfully" });
   } catch {
     return NextResponse.json(
       { error: "Something went wrong" },

@@ -26,7 +26,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (result?.error) {
-      setError("Invalid email or password. If you just signed up, check your email to verify your account.");
+      setError("Invalid email or password");
     } else {
       router.push("/listings");
       router.refresh();

@@ -1,17 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { validatePassword, isPasswordValid } from "@/lib/password-validation";
 
 export default function SignupPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const passwordChecks = validatePassword(password);
   const passwordOk = isPasswordValid(password);
@@ -42,8 +45,15 @@ export default function SignupPage() {
         return;
       }
 
-      if (data.requiresVerification) {
-        setSubmitted(true);
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.ok) {
+        router.push("/listings");
+        router.refresh();
       }
     } catch {
       setError("Something went wrong");
@@ -54,29 +64,6 @@ export default function SignupPage() {
 
   const inputClass =
     "w-full px-3 py-2.5 border border-linen-300 rounded-lg bg-white focus:ring-2 focus:ring-plum-300 focus:border-plum-400 transition-colors";
-
-  if (submitted) {
-    return (
-      <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <h1 className="text-3xl font-[var(--font-lora)] font-semibold text-plum-900 mb-4">
-          Check Your Email
-        </h1>
-        <div className="bg-white rounded-xl border border-linen-200 p-6">
-          <p className="text-stone-600 mb-2">
-            We sent a verification link to <strong>{email}</strong>.
-          </p>
-          <p className="text-stone-500 text-sm">
-            Click the link in the email to activate your account, then come back to log in.
-          </p>
-        </div>
-        <p className="text-sm text-stone-400 mt-4">
-          <Link href="/login" className="text-plum-700 hover:text-plum-800 underline underline-offset-2">
-            Go to login
-          </Link>
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-md mx-auto px-4 py-16">
@@ -124,14 +111,23 @@ export default function SignupPage() {
           <label className="block text-sm font-medium text-stone-600 mb-1.5">
             Password
           </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-            className={inputClass}
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+              className={inputClass + " pr-20"}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-plum-700 hover:text-plum-800"
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
           {password.length > 0 && (
             <ul className="mt-2 space-y-1">
               {passwordChecks.map((check) => (
