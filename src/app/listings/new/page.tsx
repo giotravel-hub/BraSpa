@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import ImageUpload from "@/components/ImageUpload";
 import { CATEGORIES, CONDITIONS, SIZES } from "@/lib/categories";
@@ -12,7 +11,6 @@ const inputClass =
 
 export default function NewListingPage() {
   const { data: session, status } = useSession();
-  const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [size, setSize] = useState("");

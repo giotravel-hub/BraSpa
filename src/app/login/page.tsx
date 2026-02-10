@@ -26,7 +26,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (result?.error) {
-      setError("Invalid email or password");
+      setError("Invalid email or password. If you just signed up, check your email to verify your account.");
     } else {
       router.push("/listings");
       router.refresh();
@@ -73,6 +73,14 @@ export default function LoginPage() {
             required
             className={inputClass}
           />
+          <div className="text-right mt-1.5">
+            <Link
+              href="/forgot-password"
+              className="text-xs text-plum-700 hover:text-plum-800 underline underline-offset-2"
+            >
+              Forgot password?
+            </Link>
+          </div>
         </div>
 
         <button

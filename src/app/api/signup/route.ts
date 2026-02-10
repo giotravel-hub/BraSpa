@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { isPasswordValid } from "@/lib/password-validation";
+import { generateToken } from "@/lib/tokens";
+import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   const ip = getClientIp(req);
@@ -35,12 +38,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
     }
 
-    if (String(password).length < 6) {
-      return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
-    }
-
     if (String(password).length > 128) {
       return NextResponse.json({ error: "Password is too long" }, { status: 400 });
+    }
+
+    if (!isPasswordValid(String(password))) {
+      return NextResponse.json(
+        { error: "Password must be at least 8 characters with uppercase, lowercase, and a number" },
+        { status: 400 }
+      );
     }
 
     if (!/^\d{5}$/.test(trimmedZip)) {
@@ -66,11 +72,24 @@ export async function POST(req: Request) {
     }
 
     const passwordHash = await hash(password, 12);
+    const verifyToken = generateToken();
+
     await prisma.user.create({
-      data: { name: trimmedName, email: trimmedEmail, passwordHash, zipCode: trimmedZip },
+      data: {
+        name: trimmedName,
+        email: trimmedEmail,
+        passwordHash,
+        zipCode: trimmedZip,
+        verifyToken,
+      },
     });
 
-    return NextResponse.json({ message: "Account created successfully" });
+    await sendVerificationEmail(trimmedEmail, verifyToken);
+
+    return NextResponse.json({
+      message: "Account created. Please check your email to verify.",
+      requiresVerification: true,
+    });
   } catch {
     return NextResponse.json(
       { error: "Something went wrong" },

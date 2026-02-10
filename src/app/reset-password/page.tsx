@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { validatePassword, isPasswordValid } from "@/lib/password-validation";
 
-export default function SignupPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+function ResetPasswordContent() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
   const [password, setPassword] = useState("");
-  const [zipCode, setZipCode] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const passwordChecks = validatePassword(password);
   const passwordOk = isPasswordValid(password);
@@ -25,25 +26,26 @@ export default function SignupPage() {
       return;
     }
 
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const res = await fetch("/api/signup", {
+      const res = await fetch("/api/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, zipCode }),
+        body: JSON.stringify({ token, password }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
         setError(data.error);
-        setLoading(false);
-        return;
-      }
-
-      if (data.requiresVerification) {
-        setSubmitted(true);
+      } else {
+        setSuccess(true);
       }
     } catch {
       setError("Something went wrong");
@@ -55,36 +57,41 @@ export default function SignupPage() {
   const inputClass =
     "w-full px-3 py-2.5 border border-linen-300 rounded-lg bg-white focus:ring-2 focus:ring-plum-300 focus:border-plum-400 transition-colors";
 
-  if (submitted) {
+  if (!token) {
     return (
-      <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <h1 className="text-3xl font-[var(--font-lora)] font-semibold text-plum-900 mb-4">
-          Check Your Email
-        </h1>
+      <div className="text-center">
         <div className="bg-white rounded-xl border border-linen-200 p-6">
-          <p className="text-stone-600 mb-2">
-            We sent a verification link to <strong>{email}</strong>.
-          </p>
-          <p className="text-stone-500 text-sm">
-            Click the link in the email to activate your account, then come back to log in.
-          </p>
+          <p className="text-red-700">Missing reset token. Please request a new password reset.</p>
         </div>
         <p className="text-sm text-stone-400 mt-4">
-          <Link href="/login" className="text-plum-700 hover:text-plum-800 underline underline-offset-2">
-            Go to login
+          <Link href="/forgot-password" className="text-plum-700 hover:text-plum-800 underline underline-offset-2">
+            Request new reset link
           </Link>
         </p>
       </div>
     );
   }
 
+  if (success) {
+    return (
+      <div className="text-center">
+        <div className="bg-white rounded-xl border border-linen-200 p-6">
+          <p className="text-green-700 mb-4">Your password has been reset successfully.</p>
+          <Link
+            href="/login"
+            className="inline-block px-4 py-2 bg-plum-700 text-white rounded-lg hover:bg-plum-800 transition-colors"
+          >
+            Log in with your new password
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-md mx-auto px-4 py-16">
-      <h1 className="text-3xl font-[var(--font-lora)] font-semibold text-plum-900 mb-2 text-center">
-        Join BraSpa
-      </h1>
+    <>
       <p className="text-center text-stone-500 mb-8">
-        Become part of your local sharing community
+        Enter your new password
       </p>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-linen-200 p-6 space-y-4">
@@ -96,33 +103,7 @@ export default function SignupPage() {
 
         <div>
           <label className="block text-sm font-medium text-stone-600 mb-1.5">
-            Name
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            className={inputClass}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-stone-600 mb-1.5">
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className={inputClass}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-stone-600 mb-1.5">
-            Password
+            New Password
           </label>
           <input
             type="password"
@@ -151,20 +132,16 @@ export default function SignupPage() {
 
         <div>
           <label className="block text-sm font-medium text-stone-600 mb-1.5">
-            Zip Code
+            Confirm Password
           </label>
           <input
-            type="text"
-            value={zipCode}
-            onChange={(e) => setZipCode(e.target.value)}
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            pattern="[0-9]{5}"
-            placeholder="e.g. 94598"
+            minLength={8}
             className={inputClass}
           />
-          <p className="text-xs text-stone-400 mt-1.5">
-            Must be in our service area
-          </p>
         </div>
 
         <button
@@ -172,16 +149,26 @@ export default function SignupPage() {
           disabled={loading}
           className="w-full py-2.5 bg-plum-700 text-white rounded-lg hover:bg-plum-800 disabled:opacity-50 font-medium transition-colors"
         >
-          {loading ? "Creating account..." : "Sign Up"}
+          {loading ? "Resetting..." : "Reset Password"}
         </button>
-
-        <p className="text-center text-sm text-stone-500">
-          Already have an account?{" "}
-          <Link href="/login" className="text-plum-700 hover:text-plum-800 underline underline-offset-2">
-            Log in
-          </Link>
-        </p>
       </form>
+    </>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <div className="max-w-md mx-auto px-4 py-16">
+      <h1 className="text-3xl font-[var(--font-lora)] font-semibold text-plum-900 mb-2 text-center">
+        Reset Password
+      </h1>
+      <Suspense fallback={
+        <div className="bg-white rounded-xl border border-linen-200 p-6 text-center">
+          <p className="text-stone-500">Loading...</p>
+        </div>
+      }>
+        <ResetPasswordContent />
+      </Suspense>
     </div>
   );
 }
