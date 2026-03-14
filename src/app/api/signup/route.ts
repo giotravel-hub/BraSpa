@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     });
     if (!allowed) {
       return NextResponse.json(
-        { error: "Your zip code is not in our service area" },
+        { error: "BraSpa is currently available in central Contra Costa County. We hope to expand soon! Interested in bringing BraSpa to your area? Email us at braspadmin@gmail.com" },
         { status: 400 }
       );
     }
