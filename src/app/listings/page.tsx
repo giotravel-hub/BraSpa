@@ -34,12 +34,21 @@ export default function ListingsPage() {
     if (condition) params.set("condition", condition);
     params.set("page", page.toString());
 
-    const res = await fetch(`/api/listings?${params}`);
-    const data = await res.json();
-    setListings(data.listings);
-    setTotalPages(data.totalPages);
-    setTotal(data.total);
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/listings?${params}`);
+      if (!res.ok) throw new Error("Failed to fetch listings");
+      const data = await res.json();
+      setListings(data.listings);
+      setTotalPages(data.totalPages);
+      setTotal(data.total);
+    } catch (err) {
+      console.error(err);
+      setListings([]);
+      setTotalPages(1);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
   }, [query, category, size, condition, page]);
 
   useEffect(() => {

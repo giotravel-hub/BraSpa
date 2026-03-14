@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { writeFile } from "fs/promises";
-import { join } from "path";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -45,18 +50,18 @@ export async function POST(req: Request) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      const extMap: Record<string, string> = {
-        "image/jpeg": "jpg",
-        "image/png": "png",
-        "image/webp": "webp",
-        "image/gif": "gif",
-      };
-      const ext = extMap[file.type] || "jpg";
-      const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const filepath = join(process.cwd(), "public", "uploads", filename);
+      const url = await new Promise<string>((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "braspa" },
+          (error, result) => {
+            if (error || !result) reject(error || new Error("Upload failed"));
+            else resolve(result.secure_url);
+          }
+        );
+        stream.end(buffer);
+      });
 
-      await writeFile(filepath, buffer);
-      urls.push(`/uploads/${filename}`);
+      urls.push(url);
     }
 
     return NextResponse.json({ urls });

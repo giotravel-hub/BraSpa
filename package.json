@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "npx tsx prisma/seed.ts"
+    "seed": "npx tsx prisma/seed.ts",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
@@ -20,6 +21,7 @@
     "prisma": "^5.22.0",
     "react": "^18",
     "react-dom": "^18",
+    "cloudinary": "^2.5.1",
     "resend": "^6.9.1"
   },
   "devDependencies": {

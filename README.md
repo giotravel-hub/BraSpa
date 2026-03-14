@@ -1,6 +1,6 @@
 # BraSpa
 
-A hyperlocal bra exchange platform for women who have had breast cancer. BraSpa connects people in the East Bay area (within a 10-mile radius) so they can give and receive bras without having to travel far.
+A hyperlocal bra exchange platform for women who have had breast cancer. BraSpa connects people in central Contra Costa Countyso they can give and receive bras without having to travel far.
 
 The app makes it easy for breast cancer survivors to offload bras they no longer need to others who do — keeping exchanges local, personal, and low-friction.
 
