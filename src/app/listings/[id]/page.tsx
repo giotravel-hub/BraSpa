@@ -17,7 +17,7 @@ interface ListingDetail {
   zipCode: string;
   createdAt: string;
   images: { id: string; url: string }[];
-  user: { id: string; name: string; email: string };
+  user: { id: string; name: string };
 }
 
 export default function ListingDetailPage() {

@@ -11,7 +11,7 @@ export async function GET(
     where: { id: params.id },
     include: {
       images: true,
-      user: { select: { id: true, name: true, email: true } },
+      user: { select: { id: true, name: true } },
     },
   });
 
