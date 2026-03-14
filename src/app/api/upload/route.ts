@@ -27,7 +27,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Maximum 10 files at a time" }, { status: 400 });
     }
 
-    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    const MAX_SIZE = 4 * 1024 * 1024; // 4MB (Vercel limit is 4.5MB)
     const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
     const urls: string[] = [];
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     for (const file of files) {
       if (file.size > MAX_SIZE) {
         return NextResponse.json(
-          { error: `File "${file.name}" exceeds 5MB limit` },
+          { error: `File "${file.name}" exceeds 4MB limit. Please use a smaller image.` },
           { status: 400 }
         );
       }

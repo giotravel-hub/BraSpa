@@ -13,7 +13,7 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+  const MAX_SIZE = 4 * 1024 * 1024; // 4MB
   const MAX_FILES = 3;
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,7 +29,7 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
 
     for (let i = 0; i < files.length; i++) {
       if (files[i].size > MAX_SIZE) {
-        setError(`"${files[i].name}" exceeds 5MB limit`);
+        setError(`"${files[i].name}" exceeds 4MB limit`);
         if (inputRef.current) inputRef.current.value = "";
         return;
       }
@@ -105,7 +105,7 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
           />
         </label>
         <span className="text-xs text-stone-400">
-          Max 5MB per file, up to {MAX_FILES} photos
+          Max 4MB per file, up to {MAX_FILES} photos
         </span>
       </div>
     </div>
