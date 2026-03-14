@@ -17,8 +17,11 @@ export async function GET(req: Request) {
   const allowedZips = await prisma.allowedZipCode.findMany();
   const allowedZipCodes = allowedZips.map((z) => z.zipCode);
 
+  const userId = searchParams.get("userId") || "";
+
   const where = {
     zipCode: { in: allowedZipCodes },
+    ...(userId && { userId }),
     ...(query && {
       OR: [
         { title: { contains: query } },

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -21,18 +22,49 @@ interface ListingDetail {
 
 export default function ListingDetailPage() {
   const params = useParams();
+  const { data: session } = useSession();
   const [listing, setListing] = useState<ListingDetail | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [interestStatus, setInterestStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [interestMessage, setInterestMessage] = useState("");
 
   useEffect(() => {
     fetch(`/api/listings/${params.id}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load listing");
+        return res.json();
+      })
       .then((data) => {
         setListing(data);
         setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
       });
   }, [params.id]);
+
+  const handleExpressInterest = async () => {
+    setInterestStatus("loading");
+    try {
+      const res = await fetch(`/api/listings/${params.id}/interest`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setInterestStatus("success");
+        setInterestMessage(data.message);
+      } else {
+        setInterestStatus("error");
+        setInterestMessage(data.error || "Something went wrong.");
+      }
+    } catch {
+      setInterestStatus("error");
+      setInterestMessage("Network error. Please try again.");
+    }
+  };
 
   if (loading) {
     return (
@@ -42,16 +74,24 @@ export default function ListingDetailPage() {
     );
   }
 
-  if (!listing) {
+  if (error || !listing) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl text-stone-700">Listing not found</h1>
+        <h1 className="text-2xl text-stone-700">
+          {error ? "Something went wrong" : "Listing not found"}
+        </h1>
+        <p className="text-stone-500 mt-2">
+          {error ? "We couldn't load this listing. It may not exist or there was a server error." : ""}
+        </p>
         <Link href="/listings" className="text-plum-700 hover:text-plum-800 underline underline-offset-2 mt-4 inline-block">
           Back to listings
         </Link>
       </div>
     );
   }
+
+  const currentUserId = (session?.user as { id?: string } | undefined)?.id;
+  const isOwnListing = currentUserId === listing.user.id;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -130,20 +170,41 @@ export default function ListingDetailPage() {
             </p>
 
             <div className="border-t border-linen-200 pt-5">
-              <h3 className="text-xs font-medium text-stone-400 uppercase tracking-wider mb-2">
-                Contact
-              </h3>
-              <p className="text-stone-800 font-medium">{listing.user.name.split(" ")[0]}</p>
-              <a
-                href={`mailto:${listing.user.email}`}
-                className="text-plum-700 hover:text-plum-800 underline underline-offset-2 text-sm"
-              >
-                {listing.user.email}
-              </a>
-              <p className="text-xs text-stone-400 mt-3">
+              <p className="text-stone-800 font-medium mb-1">
+                {listing.user.name.split(" ")[0]}
+              </p>
+              <p className="text-xs text-stone-400 mb-4">
                 Posted{" "}
                 {new Date(listing.createdAt).toLocaleDateString()}
               </p>
+
+              {!session ? (
+                <Link
+                  href="/login"
+                  className="text-plum-700 hover:text-plum-800 underline underline-offset-2 text-sm"
+                >
+                  Log in to express interest
+                </Link>
+              ) : isOwnListing ? (
+                <p className="text-stone-400 text-sm italic">This is your listing</p>
+              ) : interestStatus === "success" ? (
+                <p className="text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-sm">
+                  {interestMessage}
+                </p>
+              ) : (
+                <div>
+                  <button
+                    onClick={handleExpressInterest}
+                    disabled={interestStatus === "loading"}
+                    className="px-5 py-2.5 bg-plum-700 text-white rounded-lg hover:bg-plum-800 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {interestStatus === "loading" ? "Sending..." : "I'm Interested"}
+                  </button>
+                  {interestStatus === "error" && (
+                    <p className="text-red-600 text-sm mt-2">{interestMessage}</p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

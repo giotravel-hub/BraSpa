@@ -37,12 +37,11 @@ export default function MyListingsPage() {
 
   useEffect(() => {
     if (session) {
-      fetch("/api/listings?limit=100")
+      const userId = (session.user as { id: string }).id;
+      fetch(`/api/listings?userId=${userId}&limit=100`)
         .then((res) => res.json())
         .then((data) => {
-          const userId = (session.user as { id: string }).id;
-          const allListings = data.listings || data;
-          setListings(allListings.filter((l: { user: { id: string } }) => l.user?.id === userId));
+          setListings(data.listings || data);
           setLoading(false);
         });
     }
