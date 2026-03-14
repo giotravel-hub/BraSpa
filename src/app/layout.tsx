@@ -27,7 +27,7 @@ export default function RootLayout({
           <main>{children}</main>
           <footer className="border-t border-linen-200 mt-16 py-8 text-center text-sm text-stone-500">
             <p>BraSpa &mdash; Sharing comfort, building community</p>
-            <p className="mt-2"><a href="mailto:braspadmin@gmail.com" className="text-rose-600 hover:underline">Contact us</a></p>
+            <p className="mt-2"><a href="mailto:braspadmin@gmail.com" className="text-plum-300 hover:text-plum-200 hover:underline">Contact us</a></p>
           </footer>
         </Providers>
       </body>
