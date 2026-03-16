@@ -9,9 +9,28 @@ const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "BraSpa - Post-Cancer Bra Sharing",
+  title: {
+    default: "BraSpa — Post-Cancer Bra Sharing",
+    template: "%s | BraSpa",
+  },
   description:
     "A local community where breast cancer survivors share bras they no longer need.",
+  metadataBase: new URL("https://braspa.org"),
+  openGraph: {
+    title: "BraSpa — Post-Cancer Bra Sharing",
+    description:
+      "A local community where breast cancer survivors share bras they no longer need.",
+    url: "https://braspa.org",
+    siteName: "BraSpa",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "BraSpa — Post-Cancer Bra Sharing",
+    description:
+      "A local community where breast cancer survivors share bras they no longer need.",
+  },
 };
 
 export default function RootLayout({
