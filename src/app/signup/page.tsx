@@ -159,7 +159,7 @@ export default function SignupPage() {
             className={inputClass}
           />
           <p className="text-xs text-stone-400 mt-1.5">
-            Must be in our service area
+            Must be in our service area: Concord, Lafayette, Martinez, Moraga, Orinda, Pleasant Hill, or Walnut Creek
           </p>
         </div>
 
