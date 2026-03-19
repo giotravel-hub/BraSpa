@@ -36,8 +36,8 @@ export default function Home() {
                 one perfect fit at a time
               </h1>
               <p className="text-lg text-stone-600 mb-4 leading-relaxed">
-                A neighborhood space where breast cancer survivors in Walnut Creek, Concord, Pleasant Hill,
-                Lafayette, Martinez, Moraga, and Orinda can exchange bras they no longer need with others.
+                A neighborhood space where breast cancer survivors in Concord, Lafayette, Martinez, Moraga,
+                Orinda, Pleasant Hill, and Walnut Creek can exchange bras they no longer need with others.
               </p>
               <p className="text-stone-500 mb-10">
                 Mastectomy bras, post-surgical bras, prosthesis forms &mdash;
