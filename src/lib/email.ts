@@ -33,7 +33,7 @@ export async function sendNewListingNotification(listing: {
 
   await resend.emails.send({
     from: FROM_EMAIL,
-    to: "braspadmin@gmail.com",
+    to: "braspaadmin@gmail.com",
     subject: `New listing: ${listing.title}`,
     html: `
       <h2>New Listing Posted</h2>
