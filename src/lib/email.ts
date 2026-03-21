@@ -21,6 +21,34 @@ export async function sendVerificationEmail(email: string, token: string) {
   });
 }
 
+export async function sendNewListingNotification(listing: {
+  id: string;
+  title: string;
+  category: string;
+  size: string;
+  condition: string;
+  userName: string;
+}) {
+  const listingUrl = `${APP_URL}/listings/${listing.id}`;
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: "braspadmin@gmail.com",
+    subject: `New listing: ${listing.title}`,
+    html: `
+      <h2>New Listing Posted</h2>
+      <p><strong>${listing.userName}</strong> just posted a new listing:</p>
+      <ul>
+        <li><strong>Title:</strong> ${listing.title}</li>
+        <li><strong>Category:</strong> ${listing.category}</li>
+        <li><strong>Size:</strong> ${listing.size}</li>
+        <li><strong>Condition:</strong> ${listing.condition}</li>
+      </ul>
+      <p><a href="${listingUrl}">View listing</a></p>
+    `,
+  });
+}
+
 export async function sendPasswordResetEmail(email: string, token: string) {
   const resetUrl = `${APP_URL}/reset-password?token=${token}`;
 

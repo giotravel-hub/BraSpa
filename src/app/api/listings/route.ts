@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { sendNewListingNotification } from "@/lib/email";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -119,6 +120,15 @@ export async function POST(req: Request) {
       },
       include: { images: true },
     });
+
+    sendNewListingNotification({
+      id: listing.id,
+      title: listing.title,
+      category: listing.category,
+      size: listing.size,
+      condition: listing.condition,
+      userName: user.name || "Unknown",
+    }).catch((err) => console.error("Failed to send new listing notification:", err));
 
     return NextResponse.json(listing);
   } catch (err) {
