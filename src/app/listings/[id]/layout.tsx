@@ -23,6 +23,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    alternates: {
+      canonical: `https://braspa.org/listings/${listing.id}`,
+    },
     openGraph: {
       title,
       description,

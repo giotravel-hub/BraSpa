@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "https://braspa.org",
+  },
+};
 
 export default function Home() {
   return (
